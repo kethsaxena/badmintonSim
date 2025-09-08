@@ -9,22 +9,18 @@ git clone https://github.com/yourusername/badmintonSim.git
 ```
 ## How to Run Locally
 
-2. Activate simEngine:
+1. Activate project:
     ```
-    .venvSE\Scripts\activate 
+    python projSetup.py
     ```
-3. Install SimEngine:
-    ```
-    pip install -e .
-    ```
-4. Run a Game:
+2. Run a game using python Shim
     ### Desktop Tkinter App
     ```
-    python examples\deskApp.py
+    py examples\deskApp.py
     ```
     ### Game1 Application Script
     ```
-    python examples\deskApp.py
+    py examples\deskApp.py
     ```
 ## Author
 Developed by [Praketa Saxena](https://github.com/kethsaxena)
