@@ -14,6 +14,7 @@ class BadmintonMatch:
 
         # Match timing
         self.start_time = datetime.now()
+        self.end_time = None   # Time when Game ends
         self.sleep_per_rally = 0  # default = no delay
 
     def set_match_duration(self, target_seconds, estimated_rallies=150):
@@ -40,7 +41,7 @@ class BadmintonMatch:
             time.sleep(self.sleep_per_rally)
 
         return msg
-
+    # Internal method to check if the game has ended
     def _check_game_end(self):
         """Check if the current game has ended and update match state."""
         for i in (0, 1):
@@ -54,11 +55,15 @@ class BadmintonMatch:
                 msg = f"Result: {self.players[i]} wins Game {self.current_game} ({set_score_str})! Games score: {self.games_display()}"
                 self.log.append(msg)
                 print(msg)  # emit game result immediately
-
                 self.current_game += 1
-                if not self.match_over():
+               
+                # If match is over, freeze end time
+                if self.match_over():
+                    self.end_time = datetime.now()
+                else:
                     self.scores = [0, 0]
                 break
+            
 
     def scores_display(self):
         return f"{self.players[0]} {self.scores[0]} - {self.players[1]} {self.scores[1]}"
@@ -76,7 +81,7 @@ class BadmintonMatch:
 
     def final_summary(self):
         """Return formatted match summary with timestamp and duration."""
-        end_time = datetime.now()
+        end_time =  self.end_time if self.end_time else datetime.now()
         duration = end_time - self.start_time
         duration_str = str(duration).split(".")[0]  # trim microseconds
 
@@ -93,13 +98,3 @@ class BadmintonMatch:
             f'Duration: {duration_str}'
         )
 
-
-# Example run
-if __name__ == "__main__":
-    match = BadmintonMatch("Player A", "Player B")
-    match.set_match_duration(60)  # Target ~1 min match
-
-    while not match.match_over():
-        match.rally()
-
-    print(match.final_summary())

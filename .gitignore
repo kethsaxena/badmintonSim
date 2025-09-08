@@ -1,0 +1,6 @@
+# Python cache
+*.pyc
+# Virtual environments
+.venv*/
+# VScode
+.vscode
