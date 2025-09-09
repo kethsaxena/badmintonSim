@@ -23,6 +23,7 @@ def write_shims(py_exe):
         # pip.bat shim (handy)
         pip_exe = VENV / "Scripts" / "pip.exe"
         (REPO / "pip.bat").write_text(f'@echo off\r\n"{pip_exe}" %*\r\n', encoding="utf-8")
+    ## LINUX / MAC systems
     else:
         py_sh = REPO / "py"
         pip_sh = REPO / "pip"
