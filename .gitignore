@@ -1,5 +1,10 @@
 # Python cache
 *.pyc
+dist
+*.egg-info/
+*.egg
+.eggs/
+
 # Virtual environments
 .venv*/
 # VScode

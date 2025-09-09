@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "badsim"
+version = "0.2"
+description = "Badminton match simulation engine"
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [{ name = "Praketa" }]
+
+[tool.setuptools]
+packages = ["simengine"]  # package dir is the current folder
