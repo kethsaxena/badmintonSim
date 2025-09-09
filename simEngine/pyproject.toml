@@ -11,4 +11,8 @@ requires-python = ">=3.9"
 authors = [{ name = "Praketa" }]
 
 [tool.setuptools]
-packages = ["simengine"]  # package dir is the current folder
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["simengine*"]  
