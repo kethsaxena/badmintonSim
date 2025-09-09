@@ -59,9 +59,9 @@ This document tracks all phases of the project with detailed subtasks.
 [] Optionally exposed to the internet via ngrok or port forwarding
 
 ### Step 1: Backend Skeleton 
-- [ ] Create `backend/` folder  
-- [ ] Add `main.py` with a minimal FastAPI app  
-- [ ] Add `requirements.txt`:
+- [x] Create `backend/` folder  
+- [x] Add `main.py` with a minimal FastAPI app  
+- [x] Add `requirements.txt`:
     ```
   fastapi
   uvicorn
