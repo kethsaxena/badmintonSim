@@ -4,10 +4,21 @@ import platform
 import subprocess
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parent
-VENV = REPO / ".venvExm"
+REPO = Path(__file__).resolve().parents[1]
+
+if len(sys.argv) > 1:
+    VENV = REPO / sys.argv[1]
+else:
+    VENV = REPO / f".venv{REPO.parts[-1][:3].upper()}" 
+
 PKG_DIR = REPO.parent / "simEngine"
 IS_WIN = platform.system() == "Windows"
+
+
+print(f"[*] project Directory: {REPO}")
+print(f"[*] Using Virtual Environment: {VENV}")
+print(f"[*] PKG Directory: {PKG_DIR}")
+
 
 def venv_python():
     return VENV / ("Scripts/python.exe" if IS_WIN else "bin/python")
