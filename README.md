@@ -64,7 +64,7 @@ This document tracks all phases of the project with detailed subtasks.
 - [x] Add `requirements.txt`:
     ```
   fastapi
-  uvicorn
+  localBadSim
       ```
 ### Step 2: Match Management (REST API)
 - [] Import BadmintonMatch from simEngine
