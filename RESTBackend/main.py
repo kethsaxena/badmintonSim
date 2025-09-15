@@ -1,11 +1,12 @@
 import asyncio
 from dataclasses import dataclass, field
+from enum import Enum
 from importlib.metadata import version
 from fastapi import FastAPI
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from simEngine.badmintonDouble import BadmintonMatch
-from typing import Dict, Optional
+from typing import Dict, Optional, Annotated
 import uuid
 
 
@@ -28,7 +29,13 @@ class MatchState:
 
 matches: Dict[str, MatchState] = {}
 
-# #todo 
+class matchType(str,Enum):
+    menSingles = "Men's Singles"
+    menDoubles = "Men's Doubles"
+    womanSingles = "Women's Singles"
+    womenDoubles = "Women's Doubles"
+    mixedDoubles = "Mixed Doubles"
+
 # ROUTES
 @app.get("/")
 async def root():
@@ -37,10 +44,14 @@ async def root():
 
 @app.post("/matches")
 async def create_match(
-    player1: str = Query("Player A"),
-    player2: str = Query("Player B"),
+    # FUNCTION PARAMETERS
+    game : Annotated[matchType,Query(description="Badminton game type")]  = "Men's Single",
+    player1: Annotated[str | None, Query(max_length=50)]  = "Player 1",
+    player2: Annotated[str | None, Query(max_length=50)] = "Player 2",
     target_duration: Optional[str] = Query(None, description="e.g. 60, 1m, 1h"),
-    estimated_rallies: int = Query(150, ge=1),
+    estimated_rallies: int = Query(150, ge=1), # Max Number Rallies that can occur should be greater than equal to 1
+    player3: Annotated[str | None, Query(max_length=50)] = None,
+    player4: Annotated[str | None, Query(max_length=50)] = None,
 ):
     """Create a new match (CRUD: Create) and return match_id."""
     m = BadmintonMatch(player1, player2)
@@ -71,26 +82,25 @@ async def read_match(match_id: str):
         "summary": m.final_summary(),
     }
 
-def _get_state(match_id: str) -> MatchState:
-    st = matches.get(match_id)
-    if not st:
-        raise HTTPException(status_code=404, detail="match_id not found")
-    return st
-
+# todo 
 # @app.get("/show_summary")
 # async def root():
 #     return {"message": "Hello World"}
 
-# # PUT 
+#todo 
+# PUT 
 # @app.put("/simulate_match")
 # async def root():
 #     match = BadmintonMatch("Player A", "Player B")
 
+#todo 
 # @app.put("/set_duration")
 
+#todo 
 # @app.put("/reset_match")
 
-# # WEBSOCKETS
+#todo 
+# WEBSOCKETS
 # @app.websocket("/ws")
 # async def ws(websocket: WebSocket):
 #     await websocket.accept()
@@ -108,3 +118,9 @@ def _parse_duration_to_seconds(s: Optional[str]) -> int:
     if s.endswith("h"): return int(s[:-1]) * 3600
     if s.endswith("m") and s != "m": return int(s[:-1]) * 60
     return int(s)
+
+def _get_state(match_id: str) -> MatchState:
+    st = matches.get(match_id)
+    if not st:
+        raise HTTPException(status_code=404, detail="match_id not found")
+    return st
