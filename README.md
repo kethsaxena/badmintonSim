@@ -66,6 +66,18 @@ This document tracks all phases of the project with detailed subtasks.
   fastapi
   localBadSim
       ```
+
+    [ ] **Database Setup (SQLite3)**
+  - [ ] Use `sqlite3` or `SQLAlchemy` for ORM  
+  - [ ] Create `matches.db` file inside `backEnd/`  
+  - [ ] Define `Match` model with fields:
+    - `id` (primary key, UUID or int)
+    - `player_a`, `player_b`
+    - `set_scores` (JSON string, e.g. `["21-11", "21-12"]`)
+    - `final_winner`
+    - `start_time`, `end_time`
+    - `duration_seconds`
+  - [ ] Initialize DB on app startup if not exists  
 ### Step 2: Match Management (REST API)
 - [] Import BadmintonMatch from simEngine
 - [] Implement POST /start_match?player1=X&player2=Y → create new match
