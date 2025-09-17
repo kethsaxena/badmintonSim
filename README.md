@@ -51,6 +51,13 @@ This document tracks all phases of the project with detailed subtasks.
 - [ ] Add export results (CSV/JSON) feature (optional)  
 
 ### Phase 3: Backend (FastAPI)
+- [] Create FastAPI app (main.py).
+- [] Add /matches POST endpoint to create a match.
+- [] Add /matches GET endpoint to list all matches.
+- [] Add /matches/{id} GET endpoint to fetch a single match.
+- [] Add /matches/{id} PUT endpoint to update a match.
+- [] Add /matches/{id} DELETE endpoint to delete a match.
+- [] Integrate dependency injection (Depends(get_db)).
 
 ✅ Deliverable for Phase 3
 
@@ -113,3 +120,10 @@ This document tracks all phases of the project with detailed subtasks.
 ## Step 8: (Optional) External Access
  [] Install ngrok → expose port 8000 to internet
  [] Or configure router port forwarding → http://<public-ip>:8000
+
+
+langraph
+langraph cloud 
+langsmith 
+agent
+lcel 

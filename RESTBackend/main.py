@@ -1,18 +1,34 @@
 import asyncio
+from contextlib import asynccontextmanager
+from datetime import datetime
 from dataclasses import dataclass, field
+from RESTBackend.crud import init_db, insert_match,get_connection
 from enum import Enum
 from importlib.metadata import version
 from fastapi import FastAPI
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from pathlib import Path
+from projEnums import matchType
 from simEngine.badmintonDouble import BadmintonMatch
 from typing import Dict, Optional, Annotated
 import uuid
 
 
 VERsimengine = version("badsimengine")
+@asynccontextmanager
+async def lifespanBad(app: FastAPI):
+    #Iniitate SQLlite DB
+    conn =  get_connection()
+    init_db(conn)
+    yield
+    conn.close()
+    
+app = FastAPI(title="Badminton Simulation Backend",
+               version=f"{VERsimengine}",
+               lifespan=lifespanBad)
 
-app = FastAPI(title="Badminton Simulation Backend", version=f"{VERsimengine}")
+DB_FILE = Path(__file__).parent / "matches.db"
 
 # MIDDLEWARE
 app.add_middleware(
@@ -20,6 +36,7 @@ app.add_middleware(
     allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"]
 )
 
+#toDo
 # IN MEMORY STATE 
 @dataclass 
 class MatchState:
@@ -27,14 +44,8 @@ class MatchState:
     lock:asyncio.Lock = field(default_factory=asyncio.Lock)
     per_rally_delay: float = 0.0
 
+#In memory Database
 matches: Dict[str, MatchState] = {}
-
-class matchType(str,Enum):
-    menSingles = "Men's Singles"
-    menDoubles = "Men's Doubles"
-    womanSingles = "Women's Singles"
-    womenDoubles = "Women's Doubles"
-    mixedDoubles = "Mixed Doubles"
 
 # ROUTES
 @app.get("/")
@@ -42,16 +53,17 @@ async def root():
     return {"message": "Badminton Simulation App"}
 
 
-@app.post("/matches")
+@app.post("/creatematch")
 async def create_match(
-    # FUNCTION PARAMETERS
-    game : Annotated[matchType,Query(description="Badminton game type")]  = "Men's Single",
+    # Function Parameters
+    gameEvent : Annotated[matchType,Query(description="Badminton game type")]  = matchType.menSingles,
     player1: Annotated[str | None, Query(max_length=50)]  = "Player 1",
     player2: Annotated[str | None, Query(max_length=50)] = "Player 2",
     target_duration: Optional[str] = Query(None, description="e.g. 60, 1m, 1h"),
     estimated_rallies: int = Query(150, ge=1), # Max Number Rallies that can occur should be greater than equal to 1
     player3: Annotated[str | None, Query(max_length=50)] = None,
-    player4: Annotated[str | None, Query(max_length=50)] = None,
+    player4: Annotated[str | None, Query(max_length=50)] = None
+    ##########################################
 ):
     """Create a new match (CRUD: Create) and return match_id."""
     m = BadmintonMatch(player1, player2)
@@ -64,17 +76,21 @@ async def create_match(
     per_rally = _parse_duration_to_seconds(target_duration) / estimated_rallies if target_duration else 0.0
     match_id = uuid.uuid4().hex
     matches[match_id] = MatchState(m, asyncio.Lock(), per_rally_delay=max(per_rally, 0.0))
-    return {"match_id": match_id, "players": [player1, player2]}
+
+    starttime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    # insert_match(player_a, player_b, gametype, "pending", starttime)
+    return {"match_id": match_id,"event":{gameEvent}, "players": [player1, player2]}
 
 
 # GET 
-@app.get("/matches/{match_id}")
+@app.get("/matchinfo/{match_id}")
 async def read_match(match_id: str):
     """Get current state/summary (CRUD: Read)."""
     st = _get_state(match_id)
     m = st.match
     return {
         "match_id": match_id,
+        "event": m.gameType,
         "over": m.match_over(),
         "score": m.scores_display(),
         "games": m.games_display(),
@@ -83,9 +99,9 @@ async def read_match(match_id: str):
     }
 
 # todo 
-# @app.get("/show_summary")
-# async def root():
-#     return {"message": "Hello World"}
+@app.get("/show_summary/{match_id}")
+async def root():
+    return {"message": "Hello World"}
 
 #todo 
 # PUT 
@@ -94,7 +110,7 @@ async def read_match(match_id: str):
 #     match = BadmintonMatch("Player A", "Player B")
 
 #todo 
-# @app.put("/set_duration")
+# @app.put("/modify/{set_duration}")
 
 #todo 
 # @app.put("/reset_match")
