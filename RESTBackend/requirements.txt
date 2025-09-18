@@ -1,2 +1,2 @@
 fastapi[standard-no-fastapi-cloud-cli]
-.\localDist\badsimengine-0.2.0-py3-none-any.whl
+file:./localDist/badsimengine-0.2.0-py3-none-any.whl
