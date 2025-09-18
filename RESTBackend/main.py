@@ -1,15 +1,16 @@
 import asyncio
 from contextlib import asynccontextmanager
+from db import DBConnection
 from datetime import datetime
 from dataclasses import dataclass, field
-from RESTBackend.crud import init_db, insert_match,get_connection
+from crud import init_db, insert_match
 from enum import Enum
 from importlib.metadata import version
 from fastapi import FastAPI
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pathlib import Path
-from projEnums import matchType
+from projEnums import matchType,DB,matchStatus,INSERT_MATCH_SQL
 from simEngine.badmintonDouble import BadmintonMatch
 from typing import Dict, Optional, Annotated
 import uuid
@@ -19,8 +20,8 @@ VERsimengine = version("badsimengine")
 @asynccontextmanager
 async def lifespanBad(app: FastAPI):
     #Iniitate SQLlite DB
-    conn =  get_connection()
-    init_db(conn)
+    conn =  DBConnection(DB)
+    init_db(DBconOBJ=conn)
     yield
     conn.close()
     
@@ -74,12 +75,28 @@ async def create_match(
         pass
 
     per_rally = _parse_duration_to_seconds(target_duration) / estimated_rallies if target_duration else 0.0
-    match_id = uuid.uuid4().hex
-    matches[match_id] = MatchState(m, asyncio.Lock(), per_rally_delay=max(per_rally, 0.0))
+    matchid = uuid.uuid4().hex
+    sttime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    endtime = None
+    event = gameEvent
+    status = matchStatus.IP
+    summary = _getGameDesc(event,[player1,player2])
+    
+    matches[matchid] = MatchState(m, asyncio.Lock(), per_rally_delay=max(per_rally, 0.0))
+    
+    data = {
+    "sttime": sttime,
+    "endtime": endtime,
+    "matchid": matchid,
+    "event": event,
+    "summary": summary,
+    "status": status
+    }
 
-    starttime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    conn=DBConnection(DB)
+    insert_match(DBconOBJ=conn,values=data,filename=INSERT_MATCH_SQL)
     # insert_match(player_a, player_b, gametype, "pending", starttime)
-    return {"match_id": match_id,"event":{gameEvent}, "players": [player1, player2]}
+    return data
 
 
 # GET 
@@ -87,7 +104,7 @@ async def create_match(
 async def read_match(match_id: str):
     """Get current state/summary (CRUD: Read)."""
     st = _get_state(match_id)
-    m = st.match
+    m = st.matc
     return {
         "match_id": match_id,
         "event": m.gameType,
@@ -128,6 +145,14 @@ async def root():
 #         if websocket in clients: clients.remove(websocket)
 
 # HELPER FUNCTIONS
+def _getGameDesc(gameEvent:str,playerList:list) -> str:
+    message =" Vs "
+    if gameEvent in (matchType.menSingles, matchType.womanSingles):
+        message=message.join(playerList)
+    else:
+        message= message.join([" & ".join(playerList[:2])," & ".join(playerList[2:])])
+        
+    return message 
 def _parse_duration_to_seconds(s: Optional[str]) -> int:
     s = (s or "").strip().lower()
     if not s: return 0

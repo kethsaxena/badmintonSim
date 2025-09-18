@@ -18,63 +18,98 @@ def load_sql(filename:str):
     with open(file_path, "r") as f:
         sql = f.read()
     return sql
+#############################################################
+# def init_db():
+#     try: 
+#         STATUS = False
+#         conn = get_connection()
+#         cursor = conn.cursor()
+#         filename="createTable_matches.sql"
+#         CREATE_MATCH_SQL = load_sql(filename)
+#         cursor.execute(CREATE_MATCH_SQL)
+#         conn.commit()
+#         print(f"Successfully Created: {filename}")
+#         filename="createTable_events.sql"
+#         CREATE_MATCH_SQL = load_sql(filename)
+#         cursor.execute(CREATE_MATCH_SQL)
+#         conn.commit()
+#         print(f"Successfully Created: {filename}")
+#     except Exception as e:
+#         print(f"Error inserting match: {e}")
 
-def init_db():
-    try: 
-        STATUS = False
-        conn = get_connection()
-        cursor = conn.cursor()
-        filename="createTable_matches.sql"
-        CREATE_MATCH_SQL = load_sql(filename)
-        cursor.execute(CREATE_MATCH_SQL)
-        conn.commit()
-        print(f"Successfully Created: {filename}")
-        filename="createTable_events.sql"
-        CREATE_MATCH_SQL = load_sql(filename)
-        cursor.execute(CREATE_MATCH_SQL)
-        conn.commit()
-        print(f"Successfully Created: {filename}")
-    except Exception as e:
-        print(f"Error inserting match: {e}")
-
-def insert_match(*,DBconObj=None,sttime="",endtime=None,matchid="",event="",summary="",status=matchStatus.IP): 
-    STATUS = False
-    conn = get_connection()
-    cursor = conn.cursor()
+# def insert_match(*,DBconObj=None,sttime="",endtime=None,matchid="",event="",summary="",status=matchStatus.IP): 
+#     STATUS = False
+#     conn = get_connection()
+#     cursor = conn.cursor()
     
-    INSERT_MATCH_SQL = load_sql("insert_matches.sql")
-    cursor.execute(INSERT_MATCH_SQL, (sttime,endtime,matchid,event,summary,status))
-    conn.commit()
+#     INSERT_MATCH_SQL = load_sql("insert_matches.sql")
+#     cursor.execute(INSERT_MATCH_SQL, (sttime,endtime,matchid,event,summary,status))
+#     conn.commit()
 
-    # Verify insertion
-    try:
-        SELECT_MATCH_SQL=load_sql("select_match.sql")
-        cursor.execute(SELECT_MATCH_SQL, (matchid,))
-        row = cursor.fetchall()
-        print(row)
-        if row:
-            STATUS = True
-        print(f"{matchid} ROW Inserted")
-    except Exception as e:
-        print(f"Error inserting match: {e}")
+#     # Verify insertion
+#     try:
+#         SELECT_MATCH_SQL=load_sql("select_match.sql")
+#         cursor.execute(SELECT_MATCH_SQL, (matchid,))
+#         row = cursor.fetchall()
+#         print(row)
+#         if row:
+#             STATUS = True
+#         print(f"{matchid} ROW Inserted")
+#     except Exception as e:
+#         print(f"Error inserting match: {e}")
     
-    return STATUS
+#     return STATUS
 
-# THIS WORKS
+# # THIS WORKS
+# if __name__ == "__main__":
+#     init_db()
+#     from datetime import datetime
+#     sttime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+#     endtime = None
+#     matchid = uuid.uuid4().hex
+#     event = "Men's Single"
+#     status = "IN PROGRESS"
+#     summary = "Player A vs Player B"
+#     success = insert_match(sttime=sttime, endtime=endtime, matchid=matchid, event=event, summary=summary,status=status)
+#     if success:
+#         print("Insert successful")
+#########################################################################
+
+def init_db(**kwargs):
+    conn = kwargs["DBconOBJ"]
+    conn.execute_from_file("createTable_matches.sql") 
+    conn.execute_from_file("createTable_events.sql")
+
+def insert_match(**kwargs) -> bool:
+    conn = kwargs["DBconOBJ"]
+    data = kwargs["values"]
+    filename = kwargs["filename"]
+    conn.execute_from_file(filename,data)
+
 if __name__ == "__main__":
-    init_db()
-    from datetime import datetime
-    sttime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    endtime = None
-    matchid = uuid.uuid4().hex
-    event = "Men's Single"
-    status = "IN PROGRESS"
-    summary = "Player A vs Player B"
-    success = insert_match(sttime=sttime, endtime=endtime, matchid=matchid, event=event, summary=summary,status=status)
-    if success:
-        print("Insert successful")
+    print("CRUD APP")
+    # conn = DBConnection(DB)
+    # init_db(DBconOBJ=conn)
+    
+    # from datetime import datetime
+    # sttime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    # endtime = None
+    # matchid = uuid.uuid4().hex
+    # event = "Men's Single"
+    # status = "IN PROGRESS"
+    # summary = "Player A vs Player B"
+    
+    # data = {
+    # "sttime": sttime,
+    # "endtime": endtime,
+    # "matchid": matchid,
+    # "event": event,
+    # "summary": summary,
+    # "status": status
+    # }
 
-
+    # filename="insert_matches.sql"
+    # insert_match(DBconOBJ=conn,values=data,filename=filename)
 
 # if __name__ == "__main__":
 #     conn = DBConnection(DB)
@@ -88,9 +123,6 @@ if __name__ == "__main__":
 #     summary = "Player A vs Player B"
 #     success = insert_match(DBconObj=conn,sttime=sttime, endtime=endtime, matchid=matchid, event=event, summary=summary,status=status)
 
-# def init_db(DBconObj):
-#     DBconObj.execute_from_file(filename="createTable_matches.sql") 
-#     DBconObj.execute_from_file(filename="createTable_events.sql")
    
 # def runSQL(filename: str, DBconObj,isScript=False):
 #     """Execute SQL from file with commit"""

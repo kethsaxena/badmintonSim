@@ -33,25 +33,6 @@ class DBConnection:
         """Notify when existing connection is reused."""
         print(f"✅⚠️ [DBConnection] Existing connection reused {self.db_file}")
 
-    def execute_statement(self, sql: str= None, params: dict = None) -> bool:  
-        """
-        Execute SQL query or script.
-        - If sql contains multiple statements -> executescript
-        - If single statement -> execute with optional params
-        """
-
-        if not sql:
-            raise ValueError("FAIL: ❌ Invalid  `sql` check ")
-        
-        try:
-            self.cursor.execute(sql, params)
-            self.connection.commit()
-            
-            return True
-        except sqlite3.Error as e:
-            print(f"❌ ERROR:{inspect.stack()[0].function}| SQL execution FAIL: {e}")
-            return False
-        
     def execute_from_file(self, filename:str, params:dict=None):
         """
         Load SQL from file in SQL_DIR and execute.
@@ -62,12 +43,17 @@ class DBConnection:
         if not isSqlFile:
             raise TypeError(f"❌ ERROR:{inspect.stack()[0].function}: Check File {filename}")
         
-        file_path = SQL_DIR / filename
-        with open(file_path, "r") as f:
-            sql = f.read()
         try:
-            self.cursor.executescript(sql)
-            self.connection.commit()
+            file_path = SQL_DIR / filename
+            with open(file_path, "r") as f:
+                sql = f.read()
+            if params is None:
+                self.cursor.executescript(sql)
+                self.connection.commit()
+            else:
+                self.cursor.execute(sql,params)
+                self.connection.commit()
+
             print(f"✅ SQL execution SUCCESS:{filename}")
         except sqlite3.Error as e:
             print(f"❌ ERROR:{inspect.stack()[0].function} | SQL execution FAIL: {e}")
@@ -82,3 +68,23 @@ class DBConnection:
             if self.db_file in DBConnection._instances:
                 del DBConnection._instances[self.db_file]
 
+
+    # def execute_statement(self, sql: str= None, params: dict = None) -> bool:  
+    #     """
+    #     Execute SQL query or script.
+    #     - If sql contains multiple statements -> executescript
+    #     - If single statement -> execute with optional params
+    #     """
+
+    #     if not sql:
+    #         raise ValueError("FAIL: ❌ Invalid  `sql` check ")
+        
+    #     try:
+    #         self.cursor.execute(sql, params)
+    #         self.connection.commit()
+            
+    #         return True
+    #     except sqlite3.Error as e:
+    #         print(f"❌ ERROR:{inspect.stack()[0].function}| SQL execution FAIL: {e}")
+    #         return False
+        

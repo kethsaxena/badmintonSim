@@ -1,2 +1,3 @@
 INSERT INTO matches (sttime,endtime,matchid,event,summary,status)
-VALUES (?,?,?,?,?,?)
+VALUES(:sttime,:endtime,:matchid,:event,:summary,:status)
+
