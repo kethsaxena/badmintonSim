@@ -18,3 +18,5 @@ class matchType(str,Enum):
 DB = "badminton.db"
 DB_FILE = Path(__file__).parent / DB
 SQL_DIR = Path("sql")
+
+INSERT_MATCH_SQL = "insert_matches.sql"

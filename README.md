@@ -51,13 +51,13 @@ This document tracks all phases of the project with detailed subtasks.
 - [ ] Add export results (CSV/JSON) feature (optional)  
 
 ### Phase 3: Backend (FastAPI)
-- [] Create FastAPI app (main.py).
-- [] Add /matches POST endpoint to create a match.
-- [] Add /matches GET endpoint to list all matches.
-- [] Add /matches/{id} GET endpoint to fetch a single match.
-- [] Add /matches/{id} PUT endpoint to update a match.
+- [x] Create FastAPI app (crud).py.
+- [x] Integrate dependency injection (Depends(get_db)).
+- [x] Add /matches POST endpoint to create a match.
+- [] Add /matches GET endpoint to list all matches with the just matchID column.
+- [] Add /matches/{id} GET endpoint to fetch a single match info current state.
+- [] Add /matches/{id} PUT endpoint to update a match state.
 - [] Add /matches/{id} DELETE endpoint to delete a match.
-- [] Integrate dependency injection (Depends(get_db)).
 
 ✅ Deliverable for Phase 3
 
