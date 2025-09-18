@@ -4,6 +4,7 @@ import sqlite3
 from threading import Lock
 from projEnums import SQL_DIR
 import inspect
+
 class DBConnection:
     _instances = {}           # Stores singleton per db_path
     _lock = Lock()            # Global lock for thread safety
@@ -37,9 +38,8 @@ class DBConnection:
         """
         Load SQL from file in SQL_DIR and execute.
         """
-        # Detect multi-statement SQL
+        # Detect SQL file is passed
         isSqlFile = filename.strip().rstrip(".sql")
-        
         if not isSqlFile:
             raise TypeError(f"❌ ERROR:{inspect.stack()[0].function}: Check File {filename}")
         
@@ -47,9 +47,13 @@ class DBConnection:
             file_path = SQL_DIR / filename
             with open(file_path, "r") as f:
                 sql = f.read()
-            if params is None:
+            # Detect if multiline statement
+            is_multistatement = ";" in sql.strip().rstrip(";")
+            if is_multistatement:
                 self.cursor.executescript(sql)
-                self.connection.commit()
+            
+            if params is None:
+                self.cursor.execute(sql)
             else:
                 self.cursor.execute(sql,params)
                 self.connection.commit()
@@ -57,6 +61,8 @@ class DBConnection:
             print(f"✅ SQL execution SUCCESS:{filename}")
         except sqlite3.Error as e:
             print(f"❌ ERROR:{inspect.stack()[0].function} | SQL execution FAIL: {e}")
+        
+        return self.cursor
 
     def close(self):
         """Close the DB connection."""
@@ -67,24 +73,3 @@ class DBConnection:
             # Remove from singleton registry
             if self.db_file in DBConnection._instances:
                 del DBConnection._instances[self.db_file]
-
-
-    # def execute_statement(self, sql: str= None, params: dict = None) -> bool:  
-    #     """
-    #     Execute SQL query or script.
-    #     - If sql contains multiple statements -> executescript
-    #     - If single statement -> execute with optional params
-    #     """
-
-    #     if not sql:
-    #         raise ValueError("FAIL: ❌ Invalid  `sql` check ")
-        
-    #     try:
-    #         self.cursor.execute(sql, params)
-    #         self.connection.commit()
-            
-    #         return True
-    #     except sqlite3.Error as e:
-    #         print(f"❌ ERROR:{inspect.stack()[0].function}| SQL execution FAIL: {e}")
-    #         return False
-        
