@@ -3,15 +3,15 @@ from contextlib import asynccontextmanager
 from db import DBConnection
 from datetime import datetime
 from dataclasses import dataclass, field
-from crud import init_db, insert_match
-from enum import Enum
+from crud import init_db, insert_match,get_currMatches
 from importlib.metadata import version
 from fastapi import FastAPI
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from pathlib import Path
-from projEnums import matchType,DB,matchStatus,INSERT_MATCH_SQL
+from projEnums import matchType,matchStatus
+from projEnums import DB,INSERT_MATCH_SQL,SELECT_MATCHINP_SQL   
 from simEngine.badmintonDouble import BadmintonMatch
 from typing import Dict, Optional, Annotated
 import uuid
@@ -103,7 +103,21 @@ async def create_match(
     return data
 
 
-# # GET 
+# GET 
+@app.get("/lcmatches/")
+async def read_match():
+    """Get list of all matches IN PROGRESS (CRUD: Read)."""
+    conn=DBConnection(DB)
+    data=get_currMatches(DBconOBJ=conn,filename=SELECT_MATCHINP_SQL)
+    return data
+
+@app.get("/lcmatches/count")
+async def read_match():
+    """Get count of all matches IN PROGRESS (CRUD: Read)."""
+    conn=DBConnection(DB)
+    data=get_currMatches(DBconOBJ=conn,filename=SELECT_MATCHINP_SQL)
+    return len(data)
+
 # @app.get("/matchinfo/{match_id}")
 # async def read_match(match_id: str):
 #     """Get current state/summary (CRUD: Read)."""
