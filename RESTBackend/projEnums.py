@@ -4,7 +4,7 @@ from pathlib import Path
 
 # Match Status
 class matchStatus(str,Enum):
-    IP = "IN PRGRESS"
+    IP = "IN PROGRESS"
     FINISHED = "FINISHED"
 
 # Match Type
@@ -20,3 +20,4 @@ DB_FILE = Path(__file__).parent / DB
 SQL_DIR = Path("sql")
 
 INSERT_MATCH_SQL = "insert_matches.sql"
+SELECT_MATCHINP_SQL = "select_matchesINP.sql"
