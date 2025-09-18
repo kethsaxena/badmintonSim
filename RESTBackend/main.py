@@ -9,6 +9,7 @@ from importlib.metadata import version
 from fastapi import FastAPI
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 from pathlib import Path
 from projEnums import matchType,DB,matchStatus,INSERT_MATCH_SQL
 from simEngine.badmintonDouble import BadmintonMatch
@@ -26,6 +27,7 @@ async def lifespanBad(app: FastAPI):
     conn.close()
     
 app = FastAPI(title="Badminton Simulation Backend",
+              description="API backend for creating and managing badminton matches",
                version=f"{VERsimengine}",
                lifespan=lifespanBad)
 
@@ -49,10 +51,13 @@ class MatchState:
 matches: Dict[str, MatchState] = {}
 
 # ROUTES
-@app.get("/")
-async def root():
-    return {"message": "Badminton Simulation App"}
+# @app.get("/")
+# async def root():
+#     return {"app":"BadmintonAPp"}
 
+@app.get("/", include_in_schema=False)
+async def root():
+    return RedirectResponse(url="/docs")
 
 @app.post("/creatematch")
 async def create_match(
@@ -95,30 +100,29 @@ async def create_match(
 
     conn=DBConnection(DB)
     insert_match(DBconOBJ=conn,values=data,filename=INSERT_MATCH_SQL)
-    # insert_match(player_a, player_b, gametype, "pending", starttime)
     return data
 
 
-# GET 
-@app.get("/matchinfo/{match_id}")
-async def read_match(match_id: str):
-    """Get current state/summary (CRUD: Read)."""
-    st = _get_state(match_id)
-    m = st.matc
-    return {
-        "match_id": match_id,
-        "event": m.gameType,
-        "over": m.match_over(),
-        "score": m.scores_display(),
-        "games": m.games_display(),
-        "scoreline": " | ".join(f"{a}-{b}" for a, b in m.set_scores),
-        "summary": m.final_summary(),
-    }
+# # GET 
+# @app.get("/matchinfo/{match_id}")
+# async def read_match(match_id: str):
+#     """Get current state/summary (CRUD: Read)."""
+#     st = _get_state(match_id)
+#     m = st.matc
+#     return {
+#         "match_id": match_id,
+#         "event": m.gameType,
+#         "over": m.match_over(),
+#         "score": m.scores_display(),
+#         "games": m.games_display(),
+#         "scoreline": " | ".join(f"{a}-{b}" for a, b in m.set_scores),
+#         "summary": m.final_summary(),
+#     }
 
-# todo 
-@app.get("/show_summary/{match_id}")
-async def root():
-    return {"message": "Hello World"}
+# # todo 
+# @app.get("/show_summary/{match_id}")
+# async def root():
+#     return {"message": "Hello World"}
 
 #todo 
 # PUT 
